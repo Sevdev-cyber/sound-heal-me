@@ -1,19 +1,44 @@
 # Sacred Sound - Healing & Breathwork App
 
-A beautiful, modern web application for sound healing and breathwork practices. Built with zen aesthetics and calm technology principles.
+A beautiful, feature-rich web application for sound healing, breathwork practices, and personal wellness tracking.
 
-## Features
+## 🚀 Version 2.0 - Major Update!
 
-### 🫁 Breathwork Practice
-- **Multiple Breathing Patterns**
-  - Box Breathing (4-4-4-4) for balanced calm
-  - 4-7-8 Relaxation for stress relief
-  - Coherent Breathing (5-5) for heart-rate variability
-  - Energizing Breath (2-1-4-1) for morning practice
-- **Visual Guide**: Animated breathing circle that expands and contracts
-- **Audio Cues**: Gentle chimes to mark breath transitions
-- **Customizable Sessions**: 1-20 minute duration
-- **Progress Tracking**: Breath counter and time remaining
+### 👤 User Experience & Personalization
+- **User Profiles**: Track your journey with persistent stats and preferences (IndexedDB)
+- **Session History**: Calendar view with visual streak indicators
+- **XP & Levels**: Progress from Beginner → Guru with achievements
+- **Smart Recommendations**: AI-powered suggestions based on time and history
+- **Mood Tracking**: Rate your mood before/after to see improvement trends
+
+### 🫁 Advanced Breathwork
+**Wim Hof Method**: Complete 3-round protocol
+- 30-40 rapid breaths (hyperventilation)
+- Breath retention tracking with personal bests  
+- Recovery breath (15-second hold)
+- Audio cues and visual guidance
+
+**Pranayama Collection**: 4 Classic yogic techniques
+- **Nadi Shodhana** (Alternate Nostril) - Balance energy
+- **Kapalabhati** (Skull Shining) - Energizing cleanse
+- **Bhastrika** (Bellows Breath) - Powerful activation
+- **Ujjayi** (Ocean Breath) - Calming practice
+
+**Original Patterns**: Box, 4-7-8, Coherent, Energizing
+
+### 🎵 Extended Sound Library
+**13 Chakra & Healing Frequencies**:
+- 7 Chakra Bowls (396-963 Hz) - Root through Crown
+- Solfeggio Frequencies (174 Hz, 285 Hz)
+- Planetary Tones (Earth Om 136.1 Hz, Moon, Sun)
+
+**Vocal Mantras** (NEW):
+- **Om** - Earth frequency with rich harmonics
+- **Aum** - 3-phase sacred sound (A-U-M)
+- **So Hum** - Breath-synchronized mantra
+
+**Original Sounds**:
+- Singers Bowls, Nature ambience, Binaural beats, Ambient scapes
 
 ### 🎵 Sound Healing
 - **Singing Bowls**: Tibetan and Crystal bowl frequencies
@@ -97,17 +122,58 @@ This app follows **calm technology** principles inspired by the Sacred Forest pr
 ├── index.html              # Main application
 ├── index.css              # Design system and styles
 ├── app.js                 # Main controller, navigation, theme
-├── breathwork.js          # Breathwork engine and animations
-├── sound-player.js        # Sound synthesis and mixing
+├── breathwork.js          # Original breathwork engine
+├── sound-player.js        # Original sound synthesis
 ├── sessions.js            # Guided session orchestrator
 ├── manifest.json          # PWA manifest
 ├── service-worker.js      # Offline capability
+├── package.json           # NPM scripts
+├── railway.json           # Railway deployment config
 ├── README.md             # This file
-└── assets/
-    ├── audio/            # (Optional) Custom audio files
-    ├── images/           # (Optional) Custom images
-    └── icons/            # (Optional) Custom icons
+└── src/                   # NEW: Extended features
+    ├── core/
+    │   ├── storage-manager.js    # IndexedDB wrapper
+    │   ├── user-profile.js       # User profiles & stats
+    │   └── analytics.js          # Session tracking & insights
+    └── features/
+        ├── breathwork/
+        │   ├── wim-hof.js        # Wim Hof Method
+        │   └── pranayama.js      # Yogic breathing techniques
+        └── sound/
+            ├── chakra-bowls.js   # 13 healing frequencies
+            └── mantras.js        # Vocal synthesis (Om, Aum, So Hum)
 ```
+
+## Quick Start
+
+### Local Development
+```bash
+# Option 1: Direct file open
+open index.html
+
+# Option 2: HTTP server required for PWA features)
+npm run dev
+# Or:
+python3 -m http.server 8000
+```
+
+### Deploy to Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
+
+1. Click the button above or:
+2. Create Railway account at railway.app
+3. Connect your GitHub repository
+4. Railway will auto-deploy using `railway.json` config
+5. Your app will be live at a custom Railway URL
+
+### Deploy to GitHub Pages
+
+1. Push code to GitHub repository
+2. Go to Settings → Pages
+3. Select branch and root directory
+4. App live at `https://username.github.io/repo-name`
+
 
 ## Customization
 
