@@ -1,0 +1,21 @@
+{
+    "name": "sacred-sound-app",
+    "version": "2.0.0",
+    "description": "Beautiful sound healing and breathwork app with advanced features",
+    "main": "index.html",
+    "scripts": {
+        "dev": "npx -y serve@14 -s . -l 8000",
+        "start": "npx -y serve@14 -s . -l ${PORT:-8000}"
+    },
+    "keywords": [
+        "meditation",
+        "breathwork",
+        "sound-healing",
+        "wellness",
+        "pwa"
+    ],
+    "author": "Sacred Forest",
+    "license": "MIT",
+    "dependencies": {},
+    "devDependencies": {}
+}
