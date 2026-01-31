@@ -135,6 +135,21 @@ class APIClient {
         return await this.request('GET', `/analytics/${this.userId}/recommendations`);
     }
 
+    async getTrends(days = 30) {
+        if (!this.userId) throw new Error('Not logged in');
+        return await this.request('GET', `/analytics/${this.userId}/trends?days=${days}`);
+    }
+
+    async getWeeklyReport() {
+        if (!this.userId) throw new Error('Not logged in');
+        return await this.request('GET', `/analytics/${this.userId}/weekly-report`);
+    }
+
+    async getMonthlyReport(year, month) {
+        if (!this.userId) throw new Error('Not logged in');
+        return await this.request('GET', `/analytics/${this.userId}/monthly-report/${year}/${month}`);
+    }
+
     // ========== HEALTH CHECK ==========
 
     async healthCheck() {

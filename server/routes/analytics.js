@@ -80,6 +80,112 @@ router.get('/:userId/mood-stats', async (req, res) => {
     }
 });
 
+// Get 30-day session trends
+router.get('/:userId/trends', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const days = parseInt(req.query.days) || 30;
+
+        const result = await db.query(
+            `SELECT date, type, duration, mood_before, mood_after
+       FROM sessions 
+       WHERE user_id = $1 
+       AND date >= NOW() - INTERVAL '${days} days'
+       ORDER BY date ASC`,
+            [userId]
+        );
+
+        res.json({
+            days,
+            sessions: result.rows,
+            totalSessions: result.rows.length
+        });
+    } catch (error) {
+        console.error('Get trends error:', error);
+        res.status(500).json({ error: 'Failed to get trends' });
+    }
+});
+
+// Get weekly report
+router.get('/:userId/weekly-report', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const result = await db.query(
+            `SELECT 
+         COUNT(*) as sessions,
+         SUM(duration) as total_minutes,
+         AVG(mood_after - mood_before) as avg_mood_improvement
+       FROM sessions 
+       WHERE user_id = $1 
+       AND date >= NOW() - INTERVAL '7 days'`,
+            [userId]
+        );
+
+        const typeResult = await db.query(
+            `SELECT type, COUNT(*) as count
+       FROM sessions
+       WHERE user_id = $1
+       AND date >= NOW() - INTERVAL '7 days'
+       GROUP BY type`,
+            [userId]
+        );
+
+        res.json({
+            period: 'week',
+            sessions: parseInt(result.rows[0].sessions) || 0,
+            totalMinutes: parseInt(result.rows[0].total_minutes) || 0,
+            avgMoodImprovement: parseFloat(result.rows[0].avg_mood_improvement) || 0,
+            byType: typeResult.rows
+        });
+    } catch (error) {
+        console.error('Get weekly report error:', error);
+        res.status(500).json({ error: 'Failed to get weekly report' });
+    }
+});
+
+// Get monthly report
+router.get('/:userId/monthly-report/:year/:month', async (req, res) => {
+    try {
+        const { userId, year, month } = req.params;
+
+        const result = await db.query(
+            `SELECT 
+         COUNT(*) as sessions,
+         SUM(duration) as total_minutes,
+         AVG(mood_after - mood_before) as avg_mood_improvement
+       FROM sessions 
+       WHERE user_id = $1 
+       AND EXTRACT(YEAR FROM date) = $2
+       AND EXTRACT(MONTH FROM date) = $3`,
+            [userId, year, month]
+        );
+
+        const typeResult = await db.query(
+            `SELECT type, COUNT(*) as count, SUM(duration) as minutes
+       FROM sessions
+       WHERE user_id = $1
+       AND EXTRACT(YEAR FROM date) = $2
+       AND EXTRACT(MONTH FROM date) = $3
+       GROUP BY type`,
+            [userId, year, month]
+        );
+
+        res.json({
+            period: 'month',
+            year: parseInt(year),
+            month: parseInt(month),
+            sessions: parseInt(result.rows[0].sessions) || 0,
+            totalMinutes: parseInt(result.rows[0].total_minutes) || 0,
+            avgMoodImprovement: parseFloat(result.rows[0].avg_mood_improvement) || 0,
+            byType: typeResult.rows
+        });
+    } catch (error) {
+        console.error('Get monthly report error:', error);
+        res.status(500).json({ error: 'Failed to get monthly report' });
+    }
+});
+
 // Get personalized recommendations
 router.get('/:userId/recommendations', async (req, res) => {
     try {
