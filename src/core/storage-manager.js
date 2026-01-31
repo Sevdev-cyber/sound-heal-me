@@ -1,18 +1,40 @@
-// Storage Manager - IndexedDB Wrapper for Sacred Sound App
-// Handles all database operations with error handling and migrations
+// Hybrid Storage Manager - IndexedDB + Backend API Sync
+// Provides offline-first storage with cloud backup
 
-class StorageManager {
+class HybridStorageManager {
     constructor() {
         this.dbName = 'SacredSoundDB';
         this.version = 1;
         this.db = null;
+        this.syncQueue = [];
+        this.online = navigator.onLine;
+        this.backendAvailable = false;
+
+        // Listen to online/offline events
+        window.addEventListener('online', () => {
+            this.online = true;
+            this.processSyncQueue();
+        });
+
+        window.addEventListener('offline', () => {
+            this.online = false;
+        });
     }
 
-    /**
-     * Initialize database connection
-     * Creates object stores if they don't exist
-     */
     async init() {
+        // Initialize IndexedDB
+        await this.initIndexedDB();
+
+        // Check backend availability
+        if (window.apiClient) {
+            this.backendAvailable = await window.apiClient.isBackendAvailable();
+            console.log(`📡 Backend ${this.backendAvailable ? 'available' : 'unavailable'} - using ${this.backendAvailable ? 'hybrid' : 'offline'} mode`);
+        }
+
+        return this.db;
+    }
+
+    async initIndexedDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, this.version);
 
@@ -47,23 +69,130 @@ class StorageManager {
                         autoIncrement: false
                     });
                     customStore.createIndex('name', 'name', { unique: false });
-                    customStore.createIndex('favorite', 'favorite', { unique: false });
                 }
 
                 // Achievements Store
                 if (!db.objectStoreNames.contains('achievements')) {
                     db.createObjectStore('achievements', { keyPath: 'id' });
                 }
+
+                // Sync Queue Store (for offline operations)
+                if (!db.objectStoreNames.contains('syncQueue')) {
+                    db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true });
+                }
             };
         });
     }
 
+    // ========== HYBRID GET METHODS ==========
+
     /**
-     * Generic get method
+     * Get from IndexedDB (cache), fallback to API if not found
      */
     async get(storeName, key) {
         if (!this.db) await this.init();
 
+        // Try IndexedDB first
+        const localData = await this.getLocal(storeName, key);
+
+        // If found locally, return it
+        if (localData) {
+            return localData;
+        }
+
+        // Otherwise fetch from API (if available)
+        if (this.backendAvailable && this.online && window.apiClient) {
+            try {
+                const apiData = await this.fetchFromAPI(storeName, key);
+                if (apiData) {
+                    // Cache it locally
+                    await this.setLocal(storeName, apiData);
+                    return apiData;
+                }
+            } catch (error) {
+                console.warn('Failed to fetch from API, using local only:', error);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get all items - prefer API for freshest data, fallback to IndexedDB
+     */
+    async getAll(storeName) {
+        if (!this.db) await this.init();
+
+        // If online and backend available, fetch from API
+        if (this.backendAvailable && this.online && window.apiClient) {
+            try {
+                const apiData = await this.fetchAllFromAPI(storeName);
+                if (apiData) {
+                    // Update local cache
+                    await this.setAllLocal(storeName, apiData);
+                    return apiData;
+                }
+            } catch (error) {
+                console.warn('Failed to fetch from API, using local cache:', error);
+            }
+        }
+
+        // Fallback to local
+        return await this.getAllLocal(storeName);
+    }
+
+    // ========== HYBRID SET METHODS ==========
+
+    /**
+     * Set data - save to IndexedDB immediately, sync to API when online
+     */
+    async set(storeName, data) {
+        if (!this.db) await this.init();
+
+        // Always save locally first
+        await this.setLocal(storeName, data);
+
+        // Try to sync to API
+        if (this.backendAvailable && this.online && window.apiClient) {
+            try {
+                await this.syncToAPI(storeName, 'set', data);
+            } catch (error) {
+                console.warn('Failed to sync to API, queued for later:', error);
+                await this.addToSyncQueue({ storeName, action: 'set', data });
+            }
+        } else {
+            // Queue for later sync
+            await this.addToSyncQueue({ storeName, action: 'set', data });
+        }
+
+        return data;
+    }
+
+    /**
+     * Delete data - remove from IndexedDB, sync deletion to API
+     */
+    async delete(storeName, key) {
+        if (!this.db) await this.init();
+
+        // Delete locally
+        await this.deleteLocal(storeName, key);
+
+        // Try to sync deletion to API
+        if (this.backendAvailable && this.online && window.apiClient) {
+            try {
+                await this.syncToAPI(storeName, 'delete', { id: key });
+            } catch (error) {
+                console.warn('Failed to sync deletion to API:', error);
+                await this.addToSyncQueue({ storeName, action: 'delete', data: { id: key } });
+            }
+        } else {
+            await this.addToSyncQueue({ storeName, action: 'delete', data: { id: key } });
+        }
+    }
+
+    // ========== LOCAL INDEXEDDB OPERATIONS ==========
+
+    async getLocal(storeName, key) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readonly');
             const store = transaction.objectStore(storeName);
@@ -74,12 +203,7 @@ class StorageManager {
         });
     }
 
-    /**
-     * Generic get all method
-     */
-    async getAll(storeName) {
-        if (!this.db) await this.init();
-
+    async getAllLocal(storeName) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readonly');
             const store = transaction.objectStore(storeName);
@@ -90,12 +214,7 @@ class StorageManager {
         });
     }
 
-    /**
-     * Generic set/update method
-     */
-    async set(storeName, data) {
-        if (!this.db) await this.init();
-
+    async setLocal(storeName, data) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readwrite');
             const store = transaction.objectStore(storeName);
@@ -106,12 +225,12 @@ class StorageManager {
         });
     }
 
-    /**
-     * Generic delete method
-     */
-    async delete(storeName, key) {
-        if (!this.db) await this.init();
+    async setAllLocal(storeName, dataArray) {
+        const promises = dataArray.map(data => this.setLocal(storeName, data));
+        return await Promise.all(promises);
+    }
 
+    async deleteLocal(storeName, key) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([storeName], 'readwrite');
             const store = transaction.objectStore(storeName);
@@ -122,47 +241,83 @@ class StorageManager {
         });
     }
 
-    /**
-     * Query by index
-     */
-    async getAllByIndex(storeName, indexName, value) {
-        if (!this.db) await this.init();
+    // ========== API SYNC OPERATIONS ==========
 
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const index = store.index(indexName);
-            const request = index.getAll(value);
+    async fetchFromAPI(storeName, key) {
+        if (storeName === 'userProfile' && key === 'primary-user') {
+            return await window.apiClient.getProfile();
+        }
+        return null;
+    }
+
+    async fetchAllFromAPI(storeName) {
+        if (storeName === 'sessions') {
+            return await window.apiClient.getSessions();
+        }
+        return null;
+    }
+
+    async syncToAPI(storeName, action, data) {
+        if (storeName === 'userProfile') {
+            if (action === 'set') {
+                await window.apiClient.updateProfile(data);
+            }
+        } else if (storeName === 'sessions') {
+            if (action === 'set') {
+                await window.apiClient.createSession(data);
+            } else if (action === 'delete') {
+                await window.apiClient.deleteSession(data.id);
+            }
+        }
+    }
+
+    // ========== SYNC QUEUE MANAGEMENT ==========
+
+    async addToSyncQueue(operation) {
+        const transaction = this.db.transaction(['syncQueue'], 'readwrite');
+        const store = transaction.objectStore('syncQueue');
+        await store.add({
+            ...operation,
+            timestamp: Date.now(),
+            retries: 0
+        });
+        console.log('📥 Operation queued for sync:', operation);
+    }
+
+    async processSyncQueue() {
+        if (!this.backendAvailable || !this.online) return;
+
+        const queue = await new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['syncQueue'], 'readonly');
+            const store = transaction.objectStore('syncQueue');
+            const request = store.getAll();
 
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
+
+        console.log(`📤 Processing ${queue.length} queued operations...`);
+
+        for (const operation of queue) {
+            try {
+                await this.syncToAPI(operation.storeName, operation.action, operation.data);
+                // Remove from queue on success
+                await this.removeFromSyncQueue(operation.id);
+            } catch (error) {
+                console.error('Failed to sync operation:', operation, error);
+            }
+        }
     }
 
-    /**
-     * Get sessions by date range
-     */
-    async getSessionsByDateRange(startDate, endDate) {
-        if (!this.db) await this.init();
-
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['sessions'], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const index = store.index('date');
-            const range = IDBKeyRange.bound(startDate, endDate);
-            const request = index.getAll(range);
-
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
+    async removeFromSyncQueue(id) {
+        const transaction = this.db.transaction(['syncQueue'], 'readwrite');
+        const store = transaction.objectStore('syncQueue');
+        await store.delete(id);
     }
 
-    /**
-     * Clear all data (for reset/logout)
-     */
+    // ========== UTILITY METHODS ==========
+
     async clearAll() {
-        if (!this.db) await this.init();
-
         const storeNames = ['userProfile', 'sessions', 'customSessions', 'achievements'];
         const promises = storeNames.map(storeName => {
             return new Promise((resolve, reject) => {
@@ -178,24 +333,18 @@ class StorageManager {
         return Promise.all(promises);
     }
 
-    /**
-     * Export all data as JSON
-     */
     async exportData() {
         const data = {
-            userProfile: await this.get('userProfile', 'primary-user'),
-            sessions: await this.getAll('sessions'),
-            customSessions: await this.getAll('customSessions'),
-            achievements: await this.getAll('achievements'),
+            userProfile: await this.getLocal('userProfile', 'primary-user'),
+            sessions: await this.getAllLocal('sessions'),
+            customSessions: await this.getAllLocal('customSessions'),
+            achievements: await this.getAllLocal('achievements'),
             exportedAt: new Date().toISOString()
         };
 
         return data;
     }
 
-    /**
-     * Import data from JSON
-     */
     async importData(data) {
         if (data.userProfile) {
             await this.set('userProfile', data.userProfile);
@@ -209,17 +358,19 @@ class StorageManager {
 
         if (data.customSessions && Array.isArray(data.customSessions)) {
             for (const customSession of data.customSessions) {
-                await this.set('customSessions', customSession);
+                await this.setLocal('customSessions', customSession);
             }
         }
 
         if (data.achievements && Array.isArray(data.achievements)) {
             for (const achievement of data.achievements) {
-                await this.set('achievements', achievement);
+                await this.setLocal('achievements', achievement);
             }
         }
     }
 }
 
-// Create global instance
-window.storageManager = new StorageManager();
+// Replace global instance
+window.storageManager = new HybridStorageManager();
+
+console.log('💾 Hybrid Storage Manager initialized');
