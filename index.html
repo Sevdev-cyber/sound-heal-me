@@ -1,29 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Beautiful sound healing and breathwork app for meditation, relaxation, and wellness practices">
+  <meta name="description"
+    content="Beautiful sound healing and breathwork app for meditation, relaxation, and wellness practices">
   <meta name="keywords" content="sound healing, breathwork, meditation, wellness, relaxation, mindfulness">
   <meta name="author" content="Sacred Forest">
   <meta name="theme-color" content="#8b5cf6">
-  
+
   <!-- Open Graph / Social Media -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Sacred Sound - Healing & Breathwork">
   <meta property="og:description" content="Transform your wellness practice with guided breathwork and healing sounds">
-  
+
   <title>Sacred Sound - Healing & Breathwork</title>
-  
+
   <!-- Styles -->
   <link rel="stylesheet" href="index.css">
-  
+
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%238b5cf6'/></svg>">
-  
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%238b5cf6'/></svg>">
+
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <!-- Navigation -->
   <nav class="nav" id="nav">
@@ -31,7 +35,9 @@
       <a href="#" class="nav-brand">🌙 Sacred Sound</a>
       <ul class="nav-links">
         <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+        <li><a href="#profile" class="nav-link" data-section="profile">Profile</a></li>
         <li><a href="#breathwork" class="nav-link" data-section="breathwork">Breathwork</a></li>
+        <li><a href="#advanced" class="nav-link" data-section="advanced">Advanced</a></li>
         <li><a href="#sound" class="nav-link" data-section="sound">Sound</a></li>
         <li><a href="#sessions" class="nav-link" data-section="sessions">Sessions</a></li>
       </ul>
@@ -43,14 +49,14 @@
 
   <!-- Main Content -->
   <main style="margin-top: 80px;">
-    
+
     <!-- Hero Section -->
     <section id="home" class="section section-lg">
       <div class="container">
         <div class="flex-column flex-center text-center" style="gap: var(--space-xl);">
           <h1 class="animate-fadeIn">Find Peace Within</h1>
           <p class="text-muted" style="max-width: 600px; font-size: var(--font-size-lg);">
-            Experience the transformative power of sound healing and conscious breathing. 
+            Experience the transformative power of sound healing and conscious breathing.
             Your journey to inner calm begins here.
           </p>
           <div class="flex gap-md" style="flex-wrap: wrap; justify-content: center;">
@@ -62,7 +68,7 @@
             </button>
           </div>
         </div>
-        
+
         <!-- Feature Cards -->
         <div class="grid grid-3 mt-xl">
           <div class="card card-glass">
@@ -85,10 +91,11 @@
     </section>
 
     <!-- Breathwork Section -->
-    <section id="breathwork" class="section" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);">
+    <section id="breathwork" class="section"
+      style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);">
       <div class="container">
         <h2 class="text-center mb-xl">Breathwork Practice</h2>
-        
+
         <div class="grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
           <!-- Breathing Circle -->
           <div class="card card-glass" style="padding: var(--space-3xl);">
@@ -102,23 +109,18 @@
                       <stop offset="100%" style="stop-color: hsl(280, 55%, 65%); stop-opacity: 1" />
                     </linearGradient>
                   </defs>
-                  <circle 
-                    id="breathCircle" 
-                    cx="140" 
-                    cy="140" 
-                    r="80" 
-                    fill="url(#breathGradient)" 
-                    opacity="0.7"
-                    style="transition: all 0.3s ease;"
-                  />
+                  <circle id="breathCircle" cx="140" cy="140" r="80" fill="url(#breathGradient)" opacity="0.7"
+                    style="transition: all 0.3s ease;" />
                 </svg>
-                <div id="breathText" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
-                  <div style="font-family: var(--font-heading); font-size: var(--font-size-2xl); font-weight: 500; color: var(--color-primary);">
+                <div id="breathText"
+                  style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
+                  <div
+                    style="font-family: var(--font-heading); font-size: var(--font-size-2xl); font-weight: 500; color: var(--color-primary);">
                     Ready
                   </div>
                 </div>
               </div>
-              
+
               <!-- Breath Pattern Selector -->
               <div style="width: 100%;">
                 <label class="text-muted mb-sm" style="display: block; font-size: var(--font-size-sm);">
@@ -131,29 +133,22 @@
                   <option value="energize">Energizing (2-1-4-1)</option>
                 </select>
               </div>
-              
+
               <!-- Session Duration -->
               <div style="width: 100%;">
                 <label class="text-muted mb-sm" style="display: block; font-size: var(--font-size-sm);">
                   Duration: <span id="durationLabel">5</span> minutes
                 </label>
-                <input 
-                  type="range" 
-                  id="breathDuration" 
-                  class="slider" 
-                  min="1" 
-                  max="20" 
-                  value="5"
-                />
+                <input type="range" id="breathDuration" class="slider" min="1" max="20" value="5" />
               </div>
-              
+
               <!-- Progress -->
               <div id="breathProgress" style="width: 100%; text-align: center; display: none;">
                 <div class="text-muted" style="font-size: var(--font-size-sm);">
                   Breath <span id="breathCount">0</span> • <span id="timeRemaining">5:00</span> remaining
                 </div>
               </div>
-              
+
               <!-- Controls -->
               <div class="flex gap-md" style="width: 100%;">
                 <button id="breathStart" class="btn btn-primary" style="flex: 1;">
@@ -176,9 +171,9 @@
     <section id="sound" class="section">
       <div class="container">
         <h2 class="text-center mb-xl">Sound Healing</h2>
-        
+
         <div class="grid" style="grid-template-columns: 1fr; max-width: 900px; margin: 0 auto; gap: var(--space-xl);">
-          
+
           <!-- Sound Categories -->
           <div class="grid grid-2">
             <div class="card">
@@ -195,7 +190,7 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="card">
               <h4>🌊 Nature Sounds</h4>
               <p class="text-muted mb-lg" style="font-size: var(--font-size-sm);">
@@ -213,7 +208,7 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="card">
               <h4>🎧 Binaural Beats</h4>
               <p class="text-muted mb-lg" style="font-size: var(--font-size-sm);">
@@ -228,7 +223,7 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="card">
               <h4>✨ Ambient</h4>
               <p class="text-muted mb-lg" style="font-size: var(--font-size-sm);">
@@ -244,7 +239,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Active Sounds Mixer -->
           <div class="card card-glass" id="soundMixer" style="display: none;">
             <h4>Active Sounds</h4>
@@ -252,20 +247,22 @@
               <!-- Dynamically populated -->
             </div>
           </div>
-          
+
           <!-- Visualizer -->
           <div class="card" style="padding: 0; overflow: hidden;">
-            <canvas id="audioVisualizer" width="800" height="150" style="width: 100%; height: 150px; display: block;"></canvas>
+            <canvas id="audioVisualizer" width="800" height="150"
+              style="width: 100%; height: 150px; display: block;"></canvas>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Guided Sessions Section -->
-    <section id="sessions" class="section" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);">
+    <section id="sessions" class="section"
+      style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);">
       <div class="container">
         <h2 class="text-center mb-xl">Guided Sessions</h2>
-        
+
         <div class="grid grid-2">
           <div class="card card-gradient" style="cursor: pointer;" onclick="startSession('morning')">
             <div style="font-size: var(--font-size-3xl); margin-bottom: var(--space-md);">☀️</div>
@@ -278,7 +275,7 @@
               <span>🫁 + 🎵</span>
             </div>
           </div>
-          
+
           <div class="card" style="cursor: pointer;" onclick="startSession('stress')">
             <div style="font-size: var(--font-size-3xl); margin-bottom: var(--space-md);">😌</div>
             <h3>Stress Relief</h3>
@@ -290,7 +287,7 @@
               <span>🫁 + 🎵</span>
             </div>
           </div>
-          
+
           <div class="card" style="cursor: pointer;" onclick="startSession('deep')">
             <div style="font-size: var(--font-size-3xl); margin-bottom: var(--space-md);">🧘</div>
             <h3>Deep Relaxation</h3>
@@ -302,7 +299,7 @@
               <span>🫁 + 🎵</span>
             </div>
           </div>
-          
+
           <div class="card" style="cursor: pointer;" onclick="startSession('sleep')">
             <div style="font-size: var(--font-size-3xl); margin-bottom: var(--space-md);">🌙</div>
             <h3>Sleep Preparation</h3>
@@ -329,9 +326,23 @@
   </main>
 
   <!-- Scripts -->
+  <!-- Core modules -->
+  <script src="src/core/storage-manager.js"></script>
+  <script src="src/core/user-profile.js"></script>
+  <script src="src/core/analytics.js"></script>
+  <script src="src/core/ui-controller.js"></script>
+
+  <!-- Feature modules -->
+  <script src="src/features/sound/chakra-bowls.js"></script>
+  <script src="src/features/sound/mantras.js"></script>
+  <script src="src/features/breathwork/wim-hof.js"></script>
+  <script src="src/features/breathwork/pranayama.js"></script>
+
+  <!-- Original modules -->
   <script src="breathwork.js"></script>
   <script src="sound-player.js"></script>
   <script src="sessions.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>
