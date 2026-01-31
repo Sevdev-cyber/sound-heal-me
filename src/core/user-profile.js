@@ -11,9 +11,26 @@ class UserProfile {
     /**
      * Initialize user profile
      * Creates default profile if doesn't exist
+     * Auto-login to backend if available
      */
     async init() {
         await window.storageManager.init();
+
+        // Auto-login to backend if available
+        if (window.apiClient && window.storageManager.backendAvailable) {
+            try {
+                const existingUserId = localStorage.getItem('userId');
+                const response = await window.apiClient.login(existingUserId);
+
+                if (response.user) {
+                    console.log('✅ Logged in to backend:', response.user.id);
+                    // Update userId to match backend
+                    this.userId = response.user.id;
+                }
+            } catch (error) {
+                console.warn('⚠️ Backend login failed, using local-only mode:', error);
+            }
+        }
 
         this.profile = await window.storageManager.get('userProfile', this.userId);
 
@@ -32,7 +49,7 @@ class UserProfile {
      */
     createDefaultProfile() {
         return {
-            id: this.userId,
+            id: this.userId, // Will be backend UUID after login
             created: Date.now(),
             lastAccess: Date.now(),
             preferences: {
