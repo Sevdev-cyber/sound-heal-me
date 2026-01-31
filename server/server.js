@@ -23,12 +23,14 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const sessionsRoutes = require('./routes/sessions');
 const analyticsRoutes = require('./routes/analytics');
+const achievementsRoutes = require('./routes/achievements');
 
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/sessions', sessionsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/achievements', achievementsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

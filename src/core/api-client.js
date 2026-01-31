@@ -150,6 +150,23 @@ class APIClient {
         return await this.request('GET', `/analytics/${this.userId}/monthly-report/${year}/${month}`);
     }
 
+    // ========== ACHIEVEMENTS ==========
+
+    async getAchievements() {
+        if (!this.userId) throw new Error('Not logged in');
+        return await this.request('GET', `/achievements/${this.userId}`);
+    }
+
+    async unlockAchievement(achievementId) {
+        if (!this.userId) throw new Error('Not logged in');
+        return await this.request('POST', `/achievements/${this.userId}/unlock/${achievementId}`);
+    }
+
+    async checkAchievements() {
+        if (!this.userId) throw new Error('Not logged in');
+        return await this.request('POST', `/achievements/${this.userId}/check`);
+    }
+
     // ========== HEALTH CHECK ==========
 
     async healthCheck() {
