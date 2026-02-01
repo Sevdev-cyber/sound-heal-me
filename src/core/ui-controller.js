@@ -2,105 +2,112 @@
 // Handles initialization, event listeners, and UI updates
 
 class SacredSoundUI {
-    constructor() {
-        this.profile = null;
-        this.initialized = false;
+  constructor() {
+    this.profile = null;
+    this.initialized = false;
+  }
+
+  /**
+   * Initialize the UI
+   */
+  async init() {
+    console.log('🎨 Initializing Sacred Sound UI...');
+
+    try {
+      // Initialize all modules
+      await this.initializeModules();
+
+      // Set up event listeners
+      this.setupEventListeners();
+
+      // Load and display profile
+      await this.loadProfile();
+
+      // Inject new sections  
+      this.injectSections();
+
+      //Update UI with data
+      await this.updateAllUI();
+
+      this.initialized = true;
+      console.log('✅ UI initialized successfully');
+      console.log('📊 Profile section:', document.querySelector('#profile') ? 'INJECTED ✅' : 'MISSING ❌');
+      console.log('🧘 Advanced section:', document.querySelector('#advanced') ? 'INJECTED ✅' : 'MISSING ❌');
+    } catch (error) {
+      console.error('❌ UI initialization failed:', error);
+      console.error('Stack trace:', error.stack);
+    }
+  }
+
+  /**
+   * Initialize core modules
+   */
+  async initializeModules() {
+    // Check if modules are loaded
+    if (!window.storageManager) {
+      console.error('❌ Storage manager not loaded');
+      return;
     }
 
-    /**
-     * Initialize the UI
-     */
-    async init() {
-        console.log('🎨 Initializing Sacred Sound UI...');
+    await window.storageManager.init();
+    await window.userProfile.init();
+    await window.sessionAnalytics.init();
 
-        // Initialize all modules
-        await this.initializeModules();
+    console.log('✓ Core modules initialized');
+  }
 
-        // Set up event listeners
-        this.setupEventListeners();
+  /**
+   * Load user profile
+   */
+  async loadProfile() {
+    this.profile = await window.userProfile.getProfile();
+    console.log('✓ Profile loaded:', this.profile);
+  }
 
-        // Load and display profile
-        await this.loadProfile();
+  /**
+   * Inject new HTML sections dynamically
+   */
+  injectSections() {
+    const homeSection = document.querySelector('#home');
 
-        // Inject new sections  
-        this.injectSections();
-
-        //Update UI with data
-        this.updateAllUI();
-
-        this.initialized = true;
-        console.log('✅ UI initialized successfully');
+    // Profile section after home
+    if (!document.querySelector('#profile')) {
+      const profileHTML = this.generateProfileSection();
+      homeSection.insertAdjacentHTML('afterend', profileHTML);
     }
 
-    /**
-     * Initialize core modules
-     */
-    async initializeModules() {
-        // Check if modules are loaded
-        if (!window.storageManager) {
-            console.error('❌ Storage manager not loaded');
-            return;
-        }
-
-        await window.storageManager.init();
-        await window.userProfile.init();
-        await window.sessionAnalytics.init();
-
-        console.log('✓ Core modules initialized');
+    // Advanced section  after breathwork
+    const breathworkSection = document.querySelector('#breathwork');
+    if (!document.querySelector('#advanced')) {
+      const advancedHTML = this.generateAdvancedSection();
+      breathworkSection.insertAdjacentHTML('afterend', advancedHTML);
     }
 
-    /**
-     * Load user profile
-     */
-    async loadProfile() {
-        this.profile = await window.userProfile.getProfile();
-        console.log('✓ Profile loaded:', this.profile);
-    }
+    // Chakra bowls in sound section
+    this.enhanceSoundSection();
 
-    /**
-     * Inject new HTML sections dynamically
-     */
-    injectSections() {
-        const homeSection = document.querySelector('#home');
+    console.log('✓ Sections injected');
+  }
 
-        // Profile section after home
-        if (!document.querySelector('#profile')) {
-            const profileHTML = this.generateProfileSection();
-            homeSection.insertAdjacentHTML('afterend', profileHTML);
-        }
+  /**
+   * Generate profile section HTML
+   */
+  generateProfileSection() {
+    const levelNames = ['', 'Beginner', 'Initiate', 'Practitioner', 'Adept', 'Master', 'Guru'];
+    const level = this.profile?.level || 1;
+    const xp = this.profile?.xp || 0;
+    const totalSessions = this.profile?.stats?.totalSessions || 0;
+    const totalMinutes = this.profile?.stats?.totalMinutes || 0;
+    const currentStreak = this.profile?.stats?.currentStreak || 0;
+    const longestStreak = this.profile?.stats?.longestStreak || 0;
 
-        // Advanced section  after breathwork
-        const breathworkSection = document.querySelector('#breathwork');
-        if (!document.querySelector('#advanced')) {
-            const advancedHTML = this.generateAdvancedSection();
-            breathworkSection.insertAdjacentHTML('afterend', advancedHTML);
-        }
+    // Calculate XP progress to next level
+    const xpLevels = [0, 100, 300, 700, 1500, 3000, 10000];
+    const currentLevelXP = xpLevels[level - 1] || 0;
+    const nextLevelXP = xpLevels[level] || 10000;
+    const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
 
-        // Chakra bowls in sound section
-        this.enhanceSoundSection();
-
-        console.log('✓ Sections injected');
-    }
-
-    /**
-     * Generate profile section HTML
-     */
-    generateProfileSection() {
-        const levelNames = ['', 'Beginner', 'Initiate', 'Practitioner', 'Adept', 'Master', 'Guru'];
-        const level = this.profile?.level || 1;
-        const xp = this.profile?.xp || 0;
-        const totalSessions = this.profile?.stats?.totalSessions || 0;
-        const totalMinutes = this.profile?.stats?.totalMinutes || 0;
-        const currentStreak = this.profile?.stats?.currentStreak || 0;
-        const longestStreak = this.profile?.stats?.longestStreak || 0;
-
-        // Calculate XP progress to next level
-        const xpLevels = [0, 100, 300, 700, 1500, 3000, 10000];
-        const currentLevelXP = xpLevels[level - 1] || 0;
-        const nextLevelXP = xpLevels[level] || 10000;
-        const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-
-        return `
+    return `
     <section id="profile" class="section">
       <div class="container">
         <h2 class="text-center mb-xl">Your Wellness Journey</h2>
@@ -170,15 +177,15 @@ class SacredSoundUI {
       </div>
     </section>
     `;
-    }
+  }
 
-    /**
-     * Generate advanced breathwork section
-     */
-    generateAdvancedSection() {
-        const wimHofBest = parseInt(localStorage.getItem('wimHofBest') || '0');
+  /**
+   * Generate advanced breathwork section
+   */
+  generateAdvancedSection() {
+    const wimHofBest = parseInt(localStorage.getItem('wimHofBest') || '0');
 
-        return `
+    return `
     <section id="advanced" class="section" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);">
       <div class="container">
         <h2 class="text-center mb-xl">Advanced Breathwork</h2>
@@ -256,17 +263,17 @@ class SacredSoundUI {
       </div>
     </section>
     `;
-    }
+  }
 
-    /**
-     * Enhance sound section with chakra bowls and mantras
-     */
-    enhanceSoundSection() {
-        const soundGrid = document.querySelector('#sound .grid-2');
-        if (!soundGrid) return;
+  /**
+   * Enhance sound section with chakra bowls and mantras
+   */
+  enhanceSoundSection() {
+    const soundGrid = document.querySelector('#sound .grid-2');
+    if (!soundGrid) return;
 
-        // Add Chakra Bowls card
-        const chakraCard = `
+    // Add Chakra Bowls card
+    const chakraCard = `
       <div class="card">
         <h4>🎵 Chakra Bowls</h4>
         <p class="text-muted mb-lg" style="font-size: var(--font-size-sm);">
@@ -286,8 +293,8 @@ class SacredSoundUI {
       </div>
     `;
 
-        // Add Mantras card
-        const mantraCard = `
+    // Add Mantras card
+    const mantraCard = `
       <div class="card">
         <h4>🕉️ Mantras</h4>
         <p class="text-muted mb-lg" style="font-size: var(--font-size-sm);">
@@ -304,32 +311,32 @@ class SacredSoundUI {
       </div>
     `;
 
-        soundGrid.insertAdjacentHTML('beforeend', chakraCard + mantraCard);
+    soundGrid.insertAdjacentHTML('beforeend', chakraCard + mantraCard);
+  }
+
+  /**
+   * Update all UI elements with current data
+   */
+  async updateAllUI() {
+    await this.loadRecommendations();
+    await this.loadRecentSessions();
+  }
+
+  /**
+   * Load and display recommendations
+   */
+  async loadRecommendations() {
+    const container = document.getElementById('recommendationsContainer');
+    if (!container) return;
+
+    const recommendations = await window.userProfile.getRecommendations();
+
+    if (recommendations.length === 0) {
+      container.innerHTML = '<p class="text-muted" style="font-size: var(--font-size-sm);">Complete a session to get personalized recommendations</p>';
+      return;
     }
 
-    /**
-     * Update all UI elements with current data
-     */
-    async updateAllUI() {
-        await this.loadRecommendations();
-        await this.loadRecentSessions();
-    }
-
-    /**
-     * Load and display recommendations
-     */
-    async loadRecommendations() {
-        const container = document.getElementById('recommendationsContainer');
-        if (!container) return;
-
-        const recommendations = await window.userProfile.getRecommendations();
-
-        if (recommendations.length === 0) {
-            container.innerHTML = '<p class="text-muted" style="font-size: var(--font-size-sm);">Complete a session to get personalized recommendations</p>';
-            return;
-        }
-
-        container.innerHTML = recommendations.map(rec => `
+    container.innerHTML = recommendations.map(rec => `
       <div class="flex-between" style="padding: var(--space-md); background: var(--color-surface-elevated); border-radius: var(--radius-md);">
         <div>
           <div style="font-weight: 500;">${this.getRecommendationTitle(rec)}</div>
@@ -340,29 +347,29 @@ class SacredSoundUI {
         </button>
       </div>
     `).join('');
+  }
+
+  /**
+   * Load and display recent sessions
+   */
+  async loadRecentSessions() {
+    const container = document.getElementById('recentSessions');
+    if (!container) return;
+
+    const sessions = await window.sessionAnalytics.getAllSessions();
+    const recent = sessions.slice(0, 5);
+
+    if (recent.length === 0) {
+      container.innerHTML = '<p class="text-muted text-center" style="padding: var(--space-lg);">No sessions yet. Start your journey!</p>';
+      return;
     }
 
-    /**
-     * Load and display recent sessions
-     */
-    async loadRecentSessions() {
-        const container = document.getElementById('recentSessions');
-        if (!container) return;
+    container.innerHTML = recent.map(session => {
+      const date = new Date(session.date);
+      const moodChange = session.moodAfter && session.moodBefore ?
+        (session.moodAfter - session.moodBefore > 0 ? '📈' : session.moodAfter - session.moodBefore < 0 ? '📉' : '➡️') : '';
 
-        const sessions = await window.sessionAnalytics.getAllSessions();
-        const recent = sessions.slice(0, 5);
-
-        if (recent.length === 0) {
-            container.innerHTML = '<p class="text-muted text-center" style="padding: var(--space-lg);">No sessions yet. Start your journey!</p>';
-            return;
-        }
-
-        container.innerHTML = recent.map(session => {
-            const date = new Date(session.date);
-            const moodChange = session.moodAfter && session.moodBefore ?
-                (session.moodAfter - session.moodBefore > 0 ? '📈' : session.moodAfter - session.moodBefore < 0 ? '📉' : '➡️') : '';
-
-            return `
+      return `
         <div class="flex-between" style="padding: var(--space-sm); border-bottom: 1px solid var(--color-border);">
           <div>
             <div style="font-weight: 500; font-size: var(--font-size-sm);">${session.type} • ${session.pattern || session.guidedSession || ''}</div>
@@ -371,137 +378,137 @@ class SacredSoundUI {
           <div style="font-size: var(--font-size-lg);">${moodChange}</div>
         </div>
       `;
-        }).join('');
+    }).join('');
+  }
+
+  /**
+   * Get recommendation title
+   */
+  getRecommendationTitle(rec) {
+    if (rec.type === 'breathwork') {
+      return `${rec.pattern} Breathing`;
+    } else if (rec.type === 'guided') {
+      return `${rec.session} Session`;
+    }
+    return 'Practice';
+  }
+
+  /**
+   * Start a recommended session
+   */
+  startRecommendation(type, id) {
+    if (type === 'breathwork') {
+      scrollToSection('breathwork');
+      document.getElementById('breathPattern').value = id;
+    } else if (type === 'guided') {
+      startSession(id);
+    }
+  }
+
+  /**
+   * Start Wim Hof Method
+   */
+  async startWimHof() {
+    if (!window.wimHofMethod) {
+      alert('Wim Hof module not loaded');
+      return;
     }
 
-    /**
-     * Get recommendation title
-     */
-    getRecommendationTitle(rec) {
-        if (rec.type === 'breathwork') {
-            return `${rec.pattern} Breathing`;
-        } else if (rec.type === 'guided') {
-            return `${rec.session} Session`;
-        }
-        return 'Practice';
+    // Show modal or navigate to dedicated UI
+    alert('🎉 Starting Wim Hof Method!\n\nThis will guide you through 3 rounds of:\n- 30-40 rapid breaths\n- Breath retention (as long as you can)\n- Recovery breath (15s hold)\n\nReady to start?');
+
+    await window.wimHofMethod.start();
+  }
+
+  /**
+   * Start Pranayama technique
+   */
+  async startPranayama(techniqueId) {
+    if (!window.pranayama) {
+      alert('Pranayama module not loaded');
+      return;
     }
 
-    /**
-     * Start a recommended session
-     */
-    startRecommendation(type, id) {
-        if (type === 'breathwork') {
-            scrollToSection('breathwork');
-            document.getElementById('breathPattern').value = id;
-        } else if (type === 'guided') {
-            startSession(id);
-        }
+    const technique = window.pranayama.techniques[techniqueId];
+
+    if (technique.safety && technique.safety.includes('Avoid')) {
+      const confirmed = confirm(`⚠️ Safety Notice:\n${technique.safety}\n\nDo you want to continue?`);
+      if (!confirmed) return;
     }
 
-    /**
-     * Start Wim Hof Method
-     */
-    async startWimHof() {
-        if (!window.wimHofMethod) {
-            alert('Wim Hof module not loaded');
-            return;
-        }
+    alert(`🧘 Starting ${technique.name}\n\n${technique.description}\n\nDuration: ${technique.duration || technique.reps + ' reps'} min`);
 
-        // Show modal or navigate to dedicated UI
-        alert('🎉 Starting Wim Hof Method!\n\nThis will guide you through 3 rounds of:\n- 30-40 rapid breaths\n- Breath retention (as long as you can)\n- Recovery breath (15s hold)\n\nReady to start?');
+    await window.pranayama.start(techniqueId);
+  }
 
-        await window.wimHofMethod.start();
+  /**
+   * Play a chakra bowl
+   */
+  playChakraBowl(bowlId) {
+    if (!window.chakraBowls || !window.audioContext) {
+      // Need to initialize audio context
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      window.audioContext = ctx;
     }
 
-    /**
-     * Start Pranayama technique
-     */
-    async startPranayama(techniqueId) {
-        if (!window.pranayama) {
-            alert('Pranayama module not loaded');
-            return;
-        }
+    const dest = window.audioContext.destination;
+    window.chakraBowls.play(bowlId, 0.3, dest);
 
-        const technique = window.pranayama.techniques[techniqueId];
+    // Show notification
+    window.showNotification && window.showNotification(`Playing ${bowlId}`);
+  }
 
-        if (technique.safety && technique.safety.includes('Avoid')) {
-            const confirmed = confirm(`⚠️ Safety Notice:\n${technique.safety}\n\nDo you want to continue?`);
-            if (!confirmed) return;
-        }
+  /**
+   * Show all chakras modal
+   */
+  showAllChakras() {
+    const bowls = window.chakraBowls.getAllBowls();
+    const chakras = bowls.filter(b => b.id.includes('chakra'));
 
-        alert(`🧘 Starting ${technique.name}\n\n${technique.description}\n\nDuration: ${technique.duration || technique.reps + ' reps'} min`);
+    alert('🌈 ' + chakras.map((b, i) => `${i + 1}. ${b.name} (${b.freq} Hz)`).join('\n'));
+  }
 
-        await window.pranayama.start(techniqueId);
+  /**
+   * Play mantra
+   */
+  playMantra(mantraId) {
+    if (!window.mantraVocals) {
+      alert('Mantra module not loaded');
+      return;
     }
 
-    /**
-     * Play a chakra bowl
-     */
-    playChakraBowl(bowlId) {
-        if (!window.chakraBowls || !window.audioContext) {
-            // Need to initialize audio context
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            window.audioContext = ctx;
-        }
+    const ctx = window.mantraVocals.initAudioContext();
 
-        const dest = window.audioContext.destination;
-        window.chakraBowls.play(bowlId, 0.3, dest);
-
-        // Show notification
-        window.showNotification && window.showNotification(`Playing ${bowlId}`);
+    if (mantraId === 'om') {
+      window.mantraVocals.createOm(0.4, ctx.destination);
+    } else if (mantraId === 'aum') {
+      window.mantraVocals.createAum(0.4, ctx.destination);
     }
 
-    /**
-     * Show all chakras modal
-     */
-    showAllChakras() {
-        const bowls = window.chakraBowls.getAllBowls();
-        const chakras = bowls.filter(b => b.id.includes('chakra'));
+    window.showNotification && window.showNotification(`Playing ${mantraId.toUpperCase()}`);
+  }
 
-        alert('🌈 ' + chakras.map((b, i) => `${i + 1}. ${b.name} (${b.freq} Hz)`).join('\n'));
-    }
+  /**
+   * Setup event listeners
+   */
+  setupEventListeners() {
+    // Listen to Wim Hof events
+    window.addEventListener('wimhof-update', (e) => {
+      console.log('Wim Hof update:', e.detail);
+      // Update UI based on event
+    });
 
-    /**
-     * Play mantra
-     */
-    playMantra(mantraId) {
-        if (!window.mantraVocals) {
-            alert('Mantra module not loaded');
-            return;
-        }
+    // Listen to Pranayama events
+    window.addEventListener('pranayama-update', (e) => {
+      console.log('Pranayama update:', e.detail);
+    });
 
-        const ctx = window.mantraVocals.initAudioContext();
-
-        if (mantraId === 'om') {
-            window.mantraVocals.createOm(0.4, ctx.destination);
-        } else if (mantraId === 'aum') {
-            window.mantraVocals.createAum(0.4, ctx.destination);
-        }
-
-        window.showNotification && window.showNotification(`Playing ${mantraId.toUpperCase()}`);
-    }
-
-    /**
-     * Setup event listeners
-     */
-    setupEventListeners() {
-        // Listen to Wim Hof events
-        window.addEventListener('wimhof-update', (e) => {
-            console.log('Wim Hof update:', e.detail);
-            // Update UI based on event
-        });
-
-        // Listen to Pranayama events
-        window.addEventListener('pranayama-update', (e) => {
-            console.log('Pranayama update:', e.detail);
-        });
-
-        // Listen to level up
-        window.addEventListener('level-up', async (e) => {
-            await this.loadProfile();
-            this.updateAllUI();
-        });
-    }
+    // Listen to level up
+    window.addEventListener('level-up', async (e) => {
+      await this.loadProfile();
+      this.updateAllUI();
+    });
+  }
 }
 
 // Create global instance and initialize
@@ -509,9 +516,9 @@ window.uiController = new SacredSoundUI();
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.uiController.init();
-    });
-} else {
+  document.addEventListener('DOMContentLoaded', () => {
     window.uiController.init();
+  });
+} else {
+  window.uiController.init();
 }
