@@ -167,6 +167,89 @@
       </div>
     </section>
 
+    <!-- Advanced Breathwork Section -->
+    <section id="advanced" class="section"
+      style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);">
+      <div class="container">
+        <h2 class="text-center mb-xl">Advanced Breathwork</h2>
+
+        <div style="max-width: 1000px; margin: 0 auto;">
+          <div class="grid" style="gap: var(--space-xl);">
+
+            <!-- Wim Hof Method -->
+            <div class="card card-gradient">
+              <div class="flex-between mb-md">
+                <div>
+                  <h3>❄️ Wim Hof Method</h3>
+                  <p style="opacity: 0.9;">3-round protocol with breath retention</p>
+                </div>
+                <div style="text-align: right; font-size: var(--font-size-sm);">
+                  <div style="opacity: 0.8;">Your Best:</div>
+                  <div style="font-size: var(--font-size-xl); font-weight: 600;"><span id="wimHofBest">0</span>s</div>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-lg" onclick="startWimHofMethod()" style="width: 100%;">
+                Start Wim Hof Protocol
+              </button>
+            </div>
+
+            <!-- Pranayama Collection -->
+            <div class="card">
+              <h3 class="mb-lg">🧘 Pranayama Collection</h3>
+              <div class="grid grid-2" style="gap: var(--space-md);">
+
+                <div class="card" style="background: var(--color-surface-elevated); cursor: pointer;"
+                  onclick="startPranayamaMethod('nadi-shodhana')">
+                  <h4>Nadi Shodhana</h4>
+                  <p style="font-size: var(--font-size-sm); opacity: 0.8; margin: var(--space-sm) 0;">
+                    Alternate Nostril
+                  </p>
+                  <div style="font-size: var(--font-size-xs); opacity: 0.7;">
+                    Balance • 10 min
+                  </div>
+                </div>
+
+                <div class="card" style="background: var(--color-surface-elevated); cursor: pointer;"
+                  onclick="startPranayamaMethod('kapalabhati')">
+                  <h4>Kapalabhati ⚠️</h4>
+                  <p style="font-size: var(--font-size-sm); opacity: 0.8; margin: var(--space-sm) 0;">
+                    Skull Shining
+                  </p>
+                  <div style="font-size: var(--font-size-xs); opacity: 0.7;">
+                    Energizing • 3 rounds
+                  </div>
+                </div>
+
+                <div class="card" style="background: var(--color-surface-elevated); cursor: pointer;"
+                  onclick="startPranayamaMethod('bhastrika')">
+                  <h4>Bhastrika ⚠️</h4>
+                  <p style="font-size: var(--font-size-sm); opacity: 0.8; margin: var(--space-sm) 0;">
+                    Bellows Breath
+                  </p>
+                  <div style="font-size: var(--font-size-xs); opacity: 0.7;">
+                    Advanced • Powerful
+                  </div>
+                </div>
+
+                <div class="card" style="background: var(--color-surface-elevated); cursor: pointer;"
+                  onclick="startPranayamaMethod('ujjayi')">
+                  <h4>Ujjayi</h4>
+                  <p style="font-size: var(--font-size-sm); opacity: 0.8; margin: var(--space-sm) 0;">
+                    Ocean Breath
+                  </p>
+                  <div style="font-size: var(--font-size-xs); opacity: 0.7;">
+                    Calming • 10 min
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Sound Healing Section -->
     <section id="sound" class="section">
       <div class="container">
