@@ -32,11 +32,14 @@ import './features/breathwork/pranayama.js';
 import './features/sound/chakra-bowls.js';
 import './features/sound/mantras.js';
 
-// Original modules (to be refactored)
-import '../breathwork.js';
-import '../sound-player.js';
-import '../sessions.js';
-import '../app.js';
+// Breathwork components
+import './components/breathwork/BasicBreathwork.js';
+
+// Sound components
+import './components/sound/SoundPlayer.js';
+
+// Session components
+import './components/sessions/SessionManager.js';
 
 console.log('🎨 Sacred Sound loaded via Vite');
 console.log('Environment:', import.meta.env.MODE);
