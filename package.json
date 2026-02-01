@@ -1,21 +1,25 @@
 {
-    "name": "sacred-sound-app",
+    "name": "sound-healing-breathwork",
     "version": "2.0.0",
-    "description": "Beautiful sound healing and breathwork app with advanced features",
-    "main": "index.html",
+    "type": "module",
+    "description": "Sacred Sound - Healing & Breathwork App",
     "scripts": {
-        "dev": "npx -y serve@14 -s . -l 8000",
-        "start": "npx -y serve@14 -s . -l ${PORT:-8000}"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "start": "node server/server.js"
     },
-    "keywords": [
-        "meditation",
-        "breathwork",
-        "sound-healing",
-        "wellness",
-        "pwa"
-    ],
-    "author": "Sacred Forest",
-    "license": "MIT",
-    "dependencies": {},
-    "devDependencies": {}
+    "dependencies": {
+        "express": "^4.18.2",
+        "pg": "^8.11.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "vite": "^5.0.0",
+        "@vitejs/plugin-legacy": "^5.0.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
 }

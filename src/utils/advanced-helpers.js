@@ -1,30 +1,178 @@
 // Global helper functions for advanced breathwork
 
 /**
- * Start Wim Hof Method
+ * Start Wim Hof Method with modal UI
  */
 async function startWimHofMethod() {
+    // Create modal if it doesn't exist
+    if (!document.getElementById('wimHofModal')) {
+        createWimHofModal();
+    }
+
+    const modal = document.getElementById('wimHofModal');
+    const titleEl = modal.querySelector('.wim-hof-title');
+    const roundEl = modal.querySelector('.wim-hof-round');
+    const phaseEl = modal.querySelector('.wim-hof-phase');
+    const counterEl = modal.querySelector('.wim-hof-counter');
+    const instructionsEl = modal.querySelector('.wim-hof-instructions');
+    const visualEl = modal.querySelector('.wim-hof-circle');
+    const controlsEl = modal.querySelector('.wim-hof-controls');
+
+    // Show modal
+    modal.classList.add('active');
+
+    // Check if module is loaded
     if (!window.wimHofMethod) {
-        alert('⚠️ Wim Hof module is loading...\n\nPlease wait a moment and try again.');
+        phaseEl.textContent = '⚠️ Loading...';
+        instructionsEl.textContent = 'Wim Hof module is initializing. Please wait...';
+        setTimeout(() => modal.classList.remove('active'), 3000);
         return;
     }
 
-    const confirmed = confirm(
-        '🎉 Starting Wim Hof Method!\n\n' +
-        'This will guide you through 3 rounds of:\n' +
-        '- 30-40 rapid breaths\n' +
-        '- Breath retention (as long as you can)\n' +
-        '- Recovery breath (15s hold)\n\n' +
-        'Ready to start?'
-    );
+    // Setup event listeners for UI updates
+    const updateHandler = (e) => {
+        const data = e.detail;
 
-    if (!confirmed) return;
+        if (data.round) {
+            roundEl.textContent = `Round ${data.round} of ${window.wimHofMethod.totalRounds}`;
+        }
+
+        if (data.phase === 'hyperventilation') {
+            phaseEl.textContent = '🫁 Rapid Breathing';
+            instructionsEl.textContent = data.instructions || 'Breathe in deeply, let go passively';
+            if (data.breathCount !== undefined) {
+                counterEl.textContent = `${data.breathCount}/${data.totalBreaths || 30}`;
+            }
+        } else if (data.phase === 'retention') {
+            phaseEl.textContent = '⏱️ Hold Your Breath';
+            instructionsEl.textContent = 'Relax. Stay calm. Click when you need to breathe.';
+            counterEl.textContent = `${data.retentionTime || 0}s`;
+
+            // Show completion button
+            controlsEl.innerHTML = `
+                <button class="btn btn-primary btn-lg" onclick="window.wimHofMethod.completeRetention()">
+                    I Need to Breathe
+                </button>
+                <button class="btn btn-ghost" onclick="closeWimHofModal()">
+                    Stop Protocol
+                </button>
+            `;
+        } else if (data.phase === 'recovery') {
+            phaseEl.textContent = '💨 Recovery Breath';
+            instructionsEl.textContent = data.instructions || 'Big breath in and hold for 15 seconds';
+            if (data.countdown) {
+                counterEl.textContent = `${data.countdown}s`;
+            } else {
+                counterEl.textContent = '';
+            }
+            controlsEl.innerHTML = `
+                <button class="btn btn-ghost" onclick="closeWimHofModal()">
+                    Stop
+                </button>
+            `;
+        } else if (data.phase === 'rest') {
+            phaseEl.textContent = '🧘 Rest';
+            instructionsEl.textContent = data.instructions || 'Take a moment to rest';
+            counterEl.textContent = '';
+        } else if (data.status === 'complete') {
+            phaseEl.textContent = '🎉 Complete!';
+            instructionsEl.textContent = 'Wim Hof Method completed successfully!';
+            counterEl.textContent = '';
+
+            const best = window.wimHofMethod.getBestRetentionTime();
+            controlsEl.innerHTML = `
+                <div style="text-align: center; margin-bottom: var(--space-lg);">
+                    <div style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Personal Best Retention:</div>
+                    <div style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-primary);">${best}s</div>
+                </div>
+                <button class="btn btn-primary" onclick="closeWimHofModal()">
+                    Close
+                </button>
+            `;
+
+            // Update main display
+            updateWimHofBest();
+        }
+
+        if (data.message) {
+            instructionsEl.textContent = data.message;
+        }
+    };
+
+    const breathHandler = (e) => {
+        const { phase } = e.detail;
+        visualEl.className = 'wim-hof-circle ' + phase;
+    };
+
+    window.addEventListener('wimhof-update', updateHandler);
+    window.addEventListener('wimhof-breath', breathHandler);
+
+    // Set initial UI
+    titleEl.textContent = '❄️ Wim Hof Method';
+    roundEl.textContent = 'Preparing...';
+    phaseEl.textContent = 'Get Ready';
+    instructionsEl.textContent = 'Find a comfortable position. You will be guided through 3 rounds.';
+    counterEl.textContent = '';
+    controlsEl.innerHTML = `
+        <button class="btn btn-ghost" onclick="closeWimHofModal()">Cancel</button>
+    `;
+
+    // Start after 2 seconds
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     try {
         await window.wimHofMethod.start();
     } catch (error) {
         console.error('Wim Hof error:', error);
-        alert('❌ Error starting Wim Hof Method. Check console for details.');
+        phaseEl.textContent = '❌ Error';
+        instructionsEl.textContent = 'Something went wrong. Check console for details.';
+        controlsEl.innerHTML = `
+            <button class="btn btn-primary" onclick="closeWimHofModal()">Close</button>
+        `;
+    }
+
+    // Cleanup
+    window.removeEventListener('wimhof-update', updateHandler);
+    window.removeEventListener('wimhof-breath', breathHandler);
+}
+
+/**
+ * Create Wim Hof modal HTML
+ */
+function createWimHofModal() {
+    const modal = document.createElement('div');
+    modal.id = 'wimHofModal';
+    modal.className = 'wim-hof-modal';
+    modal.innerHTML = `
+        <div class="wim-hof-container">
+            <h2 class="wim-hof-title">❄️ Wim Hof Method</h2>
+            <div class="wim-hof-round">Preparing...</div>
+            <div class="wim-hof-phase">Get Ready</div>
+            <div class="wim-hof-visual">
+                <div class="wim-hof-circle"></div>
+            </div>
+            <div class="wim-hof-counter"></div>
+            <div class="wim-hof-instructions">Breathe in deeply, let go passively</div>
+            <div class="wim-hof-controls">
+                <button class="btn btn-ghost" onclick="closeWimHofModal()">Cancel</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+/**
+ * Close Wim Hof modal
+ */
+function closeWimHofModal() {
+    const modal = document.getElementById('wimHofModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+
+    // Stop protocol if active
+    if (window.wimHofMethod && window.wimHofMethod.isActive) {
+        window.wimHofMethod.stop();
     }
 }
 
